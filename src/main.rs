@@ -11,18 +11,18 @@ fn main() {
 
     //execution loop
     loop {
-        let mut woord: String = String::new();
+        
+        let input: String = input_handler();
 
-        //input
-        println!("Enter the grid: ");
+        match input.as_str() {
+            "QUIT" => break,
+            "String is invalid" => {println!("String is invalid");
+                                     continue},
+            _ => {},
 
-        io::stdin().read_line(&mut woord)
-        .expect("Failed to read line");
+        }
 
-        //removes \n chars from input
-        woord = String::from(woord.trim());
-
-        let grid: [[char; 4]; 4] = grid_builder(woord);
+        let grid: [[char; 4]; 4] = grid_builder(input);
 
         //finds every word and prints it out if it is valid
         for path in &paths {
@@ -35,21 +35,36 @@ fn main() {
     }
 }
 
-/**Builds a grid from a string and checks if it is valid */
-fn grid_builder(woord: String) -> [[char; 4]; 4] {
-    //checks if grid is valid
-    if woord.len() != 16 {
-        panic!("grid is niet 16 characters lang");
-    }
+/**Gets input and checks if it is valid */
+fn input_handler() -> String {
+    let mut input: String = String::new();
 
-    let capwoord = woord.to_ascii_uppercase();
+    //input
+    println!("Enter the grid: ");
 
-    for char in capwoord.chars() {
-        if !char.is_alphabetic() {
-            panic!("niet alle chars zijn letters");
+    io::stdin().read_line(&mut input)
+    .expect("Failed to read line");
+
+
+
+    //removes \n chars from input
+    input = String::from(input.trim());
+
+    //checks for validity
+    if input != String::from("quit") && input.len() != 16 {
+        String::from("String is invalid")
+    } else {
+        for char in input.chars() {
+            if !char.is_alphabetic(){
+                return String::from("String is invalid");
+            }
         }
+        input.to_ascii_uppercase()
     }
+}
 
+/**Builds a grid from a string */
+fn grid_builder(woord: String) -> [[char; 4]; 4] {
     //initialize grid
     let mut grid: [[char; 4]; 4] = [
         [' ', ' ', ' ', ' '],
@@ -63,7 +78,7 @@ fn grid_builder(woord: String) -> [[char; 4]; 4] {
 
     for x in 0..4 {
         for y in 0..4 {
-            grid[x][y] = chars.next().expect("no char found");
+            grid[x][y] = chars.next().expect("No char found");
         }
     }
 
@@ -138,7 +153,7 @@ fn fill_set_file(set: &mut HashSet<String>) {
 
     let file: File = match File::open(filepath) {
         Ok(file) => file,
-        Err(_) => panic!("file could not be opened"),
+        Err(_) => panic!("File could not be opened"),
     };
 
     let reader: BufReader<File> = BufReader::new(file);
@@ -146,7 +161,7 @@ fn fill_set_file(set: &mut HashSet<String>) {
     for line in reader.lines() {
         let woord = match line {
             Ok(woord) => woord,
-            Err(_) => panic!("line read failed"),
+            Err(_) => panic!("Line read failed"),
         };
         set.insert(woord);
     }
