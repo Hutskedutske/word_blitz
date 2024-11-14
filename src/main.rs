@@ -1,18 +1,55 @@
-use std::{collections::HashSet, fs::File, io::{BufRead, BufReader}, vec};
+use std::{
+    collections::HashSet,
+    env,
+    fs::File,
+    io::{BufRead, BufReader},
+    str::Chars,
+    vec,
+};
 
 use rusqlite::Connection;
 
 fn main() {
-    let grid: [[char; 4]; 4] = [
-        ['A', 'B', 'C', 'D'],
-        ['E', 'F', 'G', 'H'],
-        ['I', 'J', 'K', 'L'],
-        ['M', 'N', 'O', 'P'],
-    ];
+    let args: Vec<String> = env::args().collect();
+
+    let woord = &args[1];
+
+    let grid = grid_builder(woord);
 
     let mut woorden: HashSet<String> = HashSet::new();
     let _ = fill_set_file(&mut woorden);
     word_seeker(grid, woorden);
+}
+
+fn grid_builder(woord: &String) -> [[char; 4]; 4] {
+    let mut chars: Chars<'_> = woord.chars();
+
+    if woord.len() != 16 {
+        panic!("grid is niet 16 characters lang");
+    }
+
+    for char in chars {
+        if !char.is_alphabetic() || !char.is_ascii_uppercase() {
+            panic!("niet alle characters zijn hoofdletters")
+        }
+    }
+
+
+    let mut grid: [[char; 4]; 4] = [
+        [' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' '],
+    ];
+    
+
+    for x in 0..4 {
+        for y in 0..4 {
+            grid[x][y] = chars.next().expect("no char found");
+        }
+    }
+
+    grid
 }
 
 fn word_seeker(grid: [[char; 4]; 4], wordlist: HashSet<String>) {
@@ -85,8 +122,9 @@ fn fill_set_file(set: &mut HashSet<String>) {
         };
         set.insert(woord);
     }
-} 
+}
 
+/*
 fn fill_set_db(set: &mut HashSet<String>) -> Result<(), Box<dyn std::error::Error>> {
     let path: &str = "D:\\SQLite\\word_blitz.db";
 
@@ -102,3 +140,4 @@ fn fill_set_db(set: &mut HashSet<String>) -> Result<(), Box<dyn std::error::Erro
 
     Ok(())
 }
+*/
