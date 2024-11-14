@@ -1,39 +1,54 @@
 use std::{
-    collections::HashSet,
-    env,
-    fs::File,
-    io::{BufRead, BufReader},
-    str::Chars,
-    vec,
+    collections::HashSet, fs::File, io::{self, BufRead, BufReader}, str::Chars, vec
 };
 
 use rusqlite::Connection;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let mut wordlist: HashSet<String> = HashSet::new();
+    let _ = fill_set_file(&mut wordlist);
+    let paths: Vec<Vec<(i32, i32)>> = pathfinder();
 
-    let woord = &args[1];
+    loop {
+        let mut woord: String = String::new();
 
-    let grid = grid_builder(woord);
+        println!("Enter the grid: ");
 
-    let mut woorden: HashSet<String> = HashSet::new();
-    let _ = fill_set_file(&mut woorden);
-    word_seeker(grid, woorden);
+    io::stdin().read_line(&mut woord)
+        .expect("Failed to read line");
+
+        woord = String::from(woord.trim());
+
+        let grid: [[char; 4]; 4] = grid_builder(woord);
+
+        for path in &paths {
+            let woord: String = word_builder(grid, path);
+            if wordlist.contains(&woord){
+                println!("{}", woord);
+            }
+        }
+
+    }
 }
 
-fn grid_builder(woord: &String) -> [[char; 4]; 4] {
-    let mut chars: Chars<'_> = woord.chars();
+fn grid_builder(woord: String) -> [[char; 4]; 4] {
+    println!("{}", woord.len());
 
     if woord.len() != 16 {
         panic!("grid is niet 16 characters lang");
     }
 
+    let capwoord = woord.to_ascii_uppercase();
+
+    let chars = capwoord.chars();
+
     for char in chars {
-        if !char.is_alphabetic() || !char.is_ascii_uppercase() {
-            panic!("niet alle characters zijn hoofdletters")
+        if !char.is_alphabetic() {
+            panic!("niet alle chars zijn letters")
         }
     }
 
+    let mut chars: Chars<'_> = woord.chars();
 
     let mut grid: [[char; 4]; 4] = [
         [' ', ' ', ' ', ' '],
@@ -52,20 +67,18 @@ fn grid_builder(woord: &String) -> [[char; 4]; 4] {
     grid
 }
 
-fn word_seeker(grid: [[char; 4]; 4], wordlist: HashSet<String>) {
+fn pathfinder() -> Vec<Vec<(i32, i32)>> {
+    let mut all_paths: Vec<Vec<(i32, i32)>> = Vec::new();
+
     for x in 0..4 {
         for y in 0..4 {
             let mut coords = vec![(x, y)];
             let mut paths: Vec<Vec<(i32, i32)>> = Vec::new();
             recursive_pathfinder(&mut coords, &mut paths, 1);
-            for path in paths {
-                let woord: String = word_builder(grid, path);
-                if wordlist.contains(&woord) {
-                    println!("{}", woord);
-                }
-            }
+            all_paths.append(&mut paths);
         }
     }
+    all_paths
 }
 
 fn recursive_pathfinder(
@@ -97,7 +110,7 @@ fn recursive_pathfinder(
     }
 }
 
-fn word_builder(grid: [[char; 4]; 4], path: Vec<(i32, i32)>) -> String {
+fn word_builder(grid: [[char; 4]; 4], path: &Vec<(i32, i32)>) -> String {
     let mut word: String = String::new();
     for coord in path {
         word.push(grid[coord.0 as usize][coord.1 as usize]);
@@ -123,21 +136,3 @@ fn fill_set_file(set: &mut HashSet<String>) {
         set.insert(woord);
     }
 }
-
-/*
-fn fill_set_db(set: &mut HashSet<String>) -> Result<(), Box<dyn std::error::Error>> {
-    let path: &str = "D:\\SQLite\\word_blitz.db";
-
-    let conn: Connection = Connection::open(path)?;
-
-    let mut stmt = conn.prepare("SELECT * FROM words")?;
-
-    let mut rows = stmt.query([])?;
-
-    while let Some(row) = rows.next()? {
-        set.insert(row.get(0)?);
-    }
-
-    Ok(())
-}
-*/
