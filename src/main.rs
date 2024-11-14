@@ -1,4 +1,4 @@
-use std::{collections::HashSet, vec};
+use std::{collections::HashSet, fs::File, io::{BufRead, BufReader}, vec};
 
 use rusqlite::Connection;
 
@@ -11,7 +11,7 @@ fn main() {
     ];
 
     let mut woorden: HashSet<String> = HashSet::new();
-    let _ = fill_set(&mut woorden);
+    let _ = fill_set_file(&mut woorden);
     word_seeker(grid, woorden);
 }
 
@@ -68,7 +68,26 @@ fn word_builder(grid: [[char; 4]; 4], path: Vec<(i32, i32)>) -> String {
     word
 }
 
-fn fill_set(set: &mut HashSet<String>) -> Result<(), Box<dyn std::error::Error>> {
+fn fill_set_file(set: &mut HashSet<String>) {
+    let filepath: &str = "resources/woordenlijst-5.txt";
+
+    let file = match File::open(filepath) {
+        Ok(file) => file,
+        Err(_) => panic!("file could not be opened"),
+    };
+
+    let reader: BufReader<File> = BufReader::new(file);
+
+    for line in reader.lines() {
+        let woord = match line {
+            Ok(woord) => woord,
+            Err(_) => panic!("line read failed"),
+        };
+        set.insert(woord);
+    }
+} 
+
+fn fill_set_db(set: &mut HashSet<String>) -> Result<(), Box<dyn std::error::Error>> {
     let path: &str = "D:\\SQLite\\word_blitz.db";
 
     let conn: Connection = Connection::open(path)?;
