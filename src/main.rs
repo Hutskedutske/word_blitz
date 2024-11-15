@@ -28,7 +28,7 @@ fn main() {
         for path in &paths {
             let woord: String = word_builder(grid, path);
             if wordlist.contains(&woord){
-                println!("{}", woord);
+                println!("{}\n{}", woord.clone(), make_grid_word(path, woord));
             }
         }
 
@@ -111,7 +111,7 @@ fn recursive_pathfinder(
 ) {
     //add current coordinates to visited coordinates
     paths.push(visited_coords.to_vec());
-    if length < 5 {
+    if length < 10 {
         for x in -1..2 {
             for y in -1..2 {
                 //None case never occurs
@@ -165,4 +165,25 @@ fn fill_set_file(set: &mut HashSet<String>) {
         };
         set.insert(woord);
     }
+}
+
+
+fn make_grid_word(path: &Vec<(i32, i32)>, word: String) -> String{
+
+    let mut chars = word.chars();
+
+
+    let mut last: String = String::new();
+
+    for x in 0..4 {
+        for y in 0..4 {
+            if path.contains(&(x, y)) {
+                last.push(chars.next().expect("no char found"));
+            } else {
+                last.push('#');
+            }
+        }
+        last.push('\n');
+    }
+    last
 }
