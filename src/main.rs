@@ -1,9 +1,12 @@
 use std::{
-    collections::HashSet, fs::File, io::{self, BufRead, BufReader}, str::Chars, vec
+    collections::HashSet,
+    fs::File,
+    io::{self, BufRead, BufReader},
+    str::Chars,
+    vec,
 };
 
 fn main() {
-
     //initialize wordlist and paths
     let mut wordlist: HashSet<String> = HashSet::new();
     let _ = fill_set_file(&mut wordlist);
@@ -11,15 +14,15 @@ fn main() {
 
     //execution loop
     loop {
-        
         let input: String = input_handler();
 
         match input.as_str() {
             "QUIT" => break,
-            "String is invalid" => {println!("String is invalid");
-                                     continue},
-            _ => {},
-
+            "String is invalid" => {
+                println!("String is invalid");
+                continue;
+            }
+            _ => {}
         }
 
         let grid: [[char; 4]; 4] = grid_builder(input);
@@ -27,11 +30,10 @@ fn main() {
         //finds every word and prints it out if it is valid
         for path in &paths {
             let woord: String = word_builder(grid, path);
-            if wordlist.contains(&woord){
+            if wordlist.contains(&woord) {
                 println!("{}\n{}", woord.clone(), make_grid_word(path, woord));
             }
         }
-
     }
 }
 
@@ -42,10 +44,9 @@ fn input_handler() -> String {
     //input
     println!("Enter the grid: ");
 
-    io::stdin().read_line(&mut input)
-    .expect("Failed to read line");
-
-
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
 
     //removes \n chars from input
     input = String::from(input.trim());
@@ -55,7 +56,7 @@ fn input_handler() -> String {
         String::from("String is invalid")
     } else {
         for char in input.chars() {
-            if !char.is_alphabetic(){
+            if !char.is_alphabetic() {
                 return String::from("String is invalid");
             }
         }
@@ -72,7 +73,7 @@ fn grid_builder(woord: String) -> [[char; 4]; 4] {
         [' ', ' ', ' ', ' '],
         [' ', ' ', ' ', ' '],
     ];
-    
+
     //creates iterator over characters from the string to put in the grid
     let mut chars: Chars<'_> = woord.chars();
 
@@ -148,8 +149,7 @@ fn word_builder(grid: [[char; 4]; 4], path: &Vec<(i32, i32)>) -> String {
 
 /**Fills a HashSet<String> with words from a file*/
 fn fill_set_file(set: &mut HashSet<String>) {
-    
-    let filepath: &str = "resources/woordenlijst-5.txt";
+    let filepath: &str = "resources/woordenlijst.txt";
 
     let file: File = match File::open(filepath) {
         Ok(file) => file,
@@ -167,22 +167,30 @@ fn fill_set_file(set: &mut HashSet<String>) {
     }
 }
 
-
-fn make_grid_word(path: &Vec<(i32, i32)>, word: String) -> String{
-
-    let mut chars = word.chars();
-
+fn make_grid_word(path: &Vec<(i32, i32)>, word: String) -> String {
+    let chars: Vec<char> = word.chars().collect();
 
     let mut last: String = String::new();
 
+    //building the string
     for x in 0..4 {
         for y in 0..4 {
+            //keeping the order of chars in the grid
             if path.contains(&(x, y)) {
-                last.push(chars.next().expect("no char found"));
+                last.push(
+                    *chars
+                        .get(
+                            path.iter()
+                                .position(|&coords| coords == (x, y))
+                                .expect("Index not found"),
+                        )
+                        .expect("Char not found"),
+                );
             } else {
                 last.push('#');
             }
         }
+        //new line in the grid
         last.push('\n');
     }
     last
