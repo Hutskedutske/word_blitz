@@ -1,5 +1,5 @@
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     fs::File,
     io::{self, BufRead, BufReader},
     str::Chars,
@@ -27,14 +27,32 @@ fn main() {
 
         let grid: [[char; 4]; 4] = grid_builder(input);
 
-        //finds every word and prints it out if it is valid
-        for path in &paths {
-            let woord: String = word_builder(grid, path);
-            if wordlist.contains(&woord) {
-                println!("{}\n{}", woord.clone(), make_grid_word(path, woord));
-            }
+        //finds every word and adds to a list it out if it is valid
+        let wordmap = word_checker(&paths, grid, &wordlist);
+
+        for pair in wordmap{
+            println!("{}\n{}", pair.0, make_grid_word(&pair.1, &pair.0));
         }
     }
+}
+
+/**finds all valid words */
+fn word_checker(
+    paths: &Vec<Vec<(i32, i32)>>,
+    grid: [[char; 4]; 4],
+    wordlist: &HashSet<String>,
+) -> HashMap<String, Vec<(i32, i32)>> {
+    //hashmap used to remove duplicates
+    let mut wordmap: HashMap<String, Vec<(i32, i32)>> = HashMap::new();
+
+    for path in paths {
+        let woord: String = word_builder(grid, path);
+        if wordlist.contains(&woord) {
+            wordmap.insert(woord, path.to_vec());
+        }
+    }
+
+    wordmap
 }
 
 /**Gets input and checks if it is valid */
@@ -167,7 +185,8 @@ fn fill_set_file(set: &mut HashSet<String>) {
     }
 }
 
-fn make_grid_word(path: &Vec<(i32, i32)>, word: String) -> String {
+/**makes a string that represents the grid with the word filled in */
+fn make_grid_word(path: &Vec<(i32, i32)>, word: &String) -> String {
     let chars: Vec<char> = word.chars().collect();
 
     let mut last: String = String::new();
