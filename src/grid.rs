@@ -7,14 +7,15 @@ use std::{
 pub fn word_in_grid(path: &Vec<(i32, i32)>, word: &String) -> String {
     let chars: Vec<char> = word.chars().collect();
 
-    let mut last: String = String::new();
+    //representation of the grid
+    let mut grid_repr: String = String::new();
 
     //building the string
     for x in 0..4 {
         for y in 0..4 {
             //keeping the order of chars in the grid
             if path.contains(&(x, y)) {
-                last.push(
+                grid_repr.push(
                     *chars
                         .get(
                             path.iter()
@@ -24,13 +25,13 @@ pub fn word_in_grid(path: &Vec<(i32, i32)>, word: &String) -> String {
                         .expect("Char not found"),
                 );
             } else {
-                last.push('#');
+                grid_repr.push('#');
             }
         }
         //new line in the grid
-        last.push('\n');
+        grid_repr.push('\n');
     }
-    last
+    grid_repr
 }
 
 /**Builds a grid from a string */
@@ -70,9 +71,10 @@ pub fn word_checker(
     grid: [[char; 4]; 4],
     wordlist: &HashSet<String>,
 ) -> Vec<(String, String)> {
+
     //hashmap used to remove duplicates
     let mut wordmap: HashMap<String, Vec<(i32, i32)>> = HashMap::new();
-    let mut sorted_woorden: Vec<(String, String)> = Vec::new();
+    let mut sorted_words: Vec<(String, String)> = Vec::new();
 
     for path in paths {
         let woord: String = word_builder(grid, path);
@@ -81,11 +83,11 @@ pub fn word_checker(
         }
     }
 
-    for word in wordmap.keys(){
-        sorted_woorden.push((word.clone(), word_in_grid(wordmap.get(word).expect("Did not find word in hashmap"), word)));
+    for word in wordmap.keys() {
+        sorted_words.push((word.clone(), word_in_grid( wordmap.get(word).expect("Did not find word in hashmap"), word)));
     }
 
-    sorted_woorden.sort_by(|a, b| b.0.len().cmp(&a.0.len()));
+    sorted_words.sort_by(|a, b| a.0.len().cmp(&b.0.len()));
 
-    sorted_woorden
+    sorted_words
 }

@@ -1,11 +1,10 @@
-use std::{
-    collections::HashSet,
-    io,
-};
-mod init;
-use init::*;
+use std::{collections::HashSet, io};
+
 mod grid;
+mod init;
+
 use grid::*;
+use init::*;
 
 fn main() {
     //initialize wordlist and paths
@@ -18,7 +17,7 @@ fn main() {
 
         match input.as_str() {
             "QUIT" => break,
-            "String is invalid" => {
+            "invalid" => {
                 println!("String is invalid");
                 continue;
             }
@@ -28,9 +27,9 @@ fn main() {
         let grid: [[char; 4]; 4] = grid_builder(input);
 
         //finds every valid word and it's representation in the grid
-        let woorden = word_checker(&paths, grid, &wordlist);
+        let valid_words: Vec<(String, String)> = word_checker(&paths, grid, &wordlist);
 
-        for pair in woorden {
+        for pair in valid_words {
             println!("{}\n{}", pair.0, pair.1);
         }
     }
@@ -40,7 +39,6 @@ fn main() {
 fn input_handler() -> String {
     let mut input: String = String::new();
 
-    //input
     println!("Enter the grid: ");
 
     io::stdin()
@@ -51,12 +49,12 @@ fn input_handler() -> String {
     input = String::from(input.trim());
 
     //checks for validity
-    if input != String::from("quit") && input.len() != 16 {
-        String::from("String is invalid")
+    if input.len() != 16 && input != String::from("quit") {
+        String::from("invalid")
     } else {
         for char in input.chars() {
             if !char.is_alphabetic() {
-                return String::from("String is invalid");
+                return String::from("invalid");
             }
         }
         input.to_ascii_uppercase()
