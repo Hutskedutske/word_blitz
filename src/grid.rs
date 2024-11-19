@@ -64,21 +64,28 @@ pub fn word_builder(grid: [[char; 4]; 4], path: &Vec<(i32, i32)>) -> String {
     word
 }
 
-/**finds all valid words */
+/**finds all valid words and returns a list with words and their representation in the grid sorted by length*/
 pub fn word_checker(
     paths: &Vec<Vec<(i32, i32)>>,
     grid: [[char; 4]; 4],
     wordlist: &HashSet<String>,
-) -> HashMap<String, Vec<(i32, i32)>> {
+) -> Vec<(String, String)> {
     //hashmap used to remove duplicates
     let mut wordmap: HashMap<String, Vec<(i32, i32)>> = HashMap::new();
+    let mut sorted_woorden: Vec<(String, String)> = Vec::new();
 
     for path in paths {
         let woord: String = word_builder(grid, path);
-        if wordlist.contains(&woord) {
+        if wordlist.contains(&woord) && !wordmap.contains_key(&woord) {
             wordmap.insert(woord, path.to_vec());
         }
     }
 
-    wordmap
+    for word in wordmap.keys(){
+        sorted_woorden.push((word.clone(), word_in_grid(wordmap.get(word).expect("Did not find word in hashmap"), word)));
+    }
+
+    sorted_woorden.sort_by(|a, b| b.0.len().cmp(&a.0.len()));
+
+    sorted_woorden
 }

@@ -27,11 +27,11 @@ fn main() {
 
         let grid: [[char; 4]; 4] = grid_builder(input);
 
-        //finds every word and adds to a list it out if it is valid
-        let wordmap = word_checker(&paths, grid, &wordlist);
+        //finds every valid word and it's representation in the grid
+        let woorden = word_checker(&paths, grid, &wordlist);
 
-        for pair in wordmap {
-            println!("{}\n{}", pair.0, word_in_grid(&pair.1, &pair.0));
+        for pair in woorden {
+            println!("{}\n{}", pair.0, pair.1);
         }
     }
 }
