@@ -1,7 +1,7 @@
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     fs::File,
-    io::{BufRead, BufReader},
+    io::{self, BufRead, BufReader},
 };
 
 /**Calls recursive_pathfinder on every coordinate to get every path and returns them in a list */
@@ -20,10 +20,7 @@ pub fn init_paths() -> Vec<Vec<(i32, i32)>> {
 }
 
 /**Constructs all paths of length 1-5 from a given starting point */
-fn recursive_pathfinder(
-    path: &mut Vec<(i32, i32)>,
-    paths: &mut Vec<Vec<(i32, i32)>>
-) {
+fn recursive_pathfinder(path: &mut Vec<(i32, i32)>, paths: &mut Vec<Vec<(i32, i32)>>) {
     //adds current path to all paths
     paths.push(path.to_vec());
     if path.len() < 10 {
@@ -48,14 +45,51 @@ fn recursive_pathfinder(
     }
 }
 
+//*lets the user choose a language and initializes the wordlist */
+pub fn init_language() -> HashSet<String> {
+    let mut input: String = String::new();
+
+    let mut filepath: &str = "none";
+
+    //map of the available languages
+    let language_map: HashMap<&str, &str> =
+        [("NL", "resources/nl.txt"),
+         ("EN", "resources/en.txt"),
+         ("FR", "resources/fr.txt"),
+         ("ES", "resources/es.txt")
+        ].iter().cloned().collect();
+
+    //loop to get input of a valid language
+    while filepath == "none" {
+        println!("Choose a language: EN, ES, FR, NL");
+
+        //read input
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
+
+        //formats input to select in the map
+        input = input.to_ascii_uppercase();
+
+        let trimmed_input: &str = input.trim();
+
+        filepath = match language_map.get(trimmed_input){
+            Some(path) => path,
+            None => {println!("language not included");
+                     continue}
+        };
+    }
+
+    init_wordlist(filepath)
+}
+
 /**Fills a HashSet<String> with words from a file*/
-pub fn init_wordlist() -> HashSet<String> {
+pub fn init_wordlist(filepath: &str) -> HashSet<String> {
     let mut woordenlijst: HashSet<String> = HashSet::new();
-    let filepath: &str = "resources/woordenlijst.txt";
 
     let file: File = match File::open(filepath) {
-        Ok(file) => file,
-        Err(_) => panic!("wordlist not found at {}", filepath)
+        Ok(file) => {file},
+        Err(_) => panic!("wordlist not found at {}", filepath),
     };
 
     let reader: BufReader<File> = BufReader::new(file);
@@ -63,7 +97,7 @@ pub fn init_wordlist() -> HashSet<String> {
     for line in reader.lines() {
         let woord = match line {
             Ok(woord) => woord,
-            Err(_) => panic!("Failed to read from {}", filepath)
+            Err(_) => panic!("Failed to read from {}", filepath),
         };
         woordenlijst.insert(woord);
     }

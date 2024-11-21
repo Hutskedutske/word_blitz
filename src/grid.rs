@@ -1,7 +1,32 @@
 use std::{
-    collections::{HashMap, HashSet},
-    str::Chars,
+    collections::{HashMap, HashSet}, io, str::Chars
 };
+
+/**Gets input and checks if it's a valid grid or quit sign*/
+pub fn grid_input_handler() -> String {
+    let mut input: String = String::new();
+
+    println!("Enter the grid: ");
+
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    //removes \n chars from input
+    input = String::from(input.trim());
+
+    //checks for validity
+    if input.len() != 16 && input != String::from("quit") {
+        String::from("invalid")
+    } else {
+        for char in input.chars() {
+            if !char.is_alphabetic() {
+                return String::from("invalid");
+            }
+        }
+        input.to_ascii_uppercase()
+    }
+}
 
 /**makes a string that represents the grid with the word filled in */
 pub fn word_in_grid(path: &Vec<(i32, i32)>, word: &String) -> String {
