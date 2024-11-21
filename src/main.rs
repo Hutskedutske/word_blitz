@@ -18,7 +18,7 @@ fn main() {
         match input.as_str() {
             "QUIT" => break,
             "invalid" => {
-                println!("String is invalid");
+                println!("Grid is invalid");
                 continue;
             }
             _ => {}
